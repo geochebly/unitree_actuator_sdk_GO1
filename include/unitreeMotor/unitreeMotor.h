@@ -34,9 +34,10 @@ struct MotorCmd{
         void modify_data(MotorCmd* motor_s); 
         uint8_t* get_motor_send_data();
 
-        COMData32 Res;                
+        COMData32 Res;
+        ControlData_t  GO_M8010_6_motor_send_data;   
+                 
     private:
-        ControlData_t  GO_M8010_6_motor_send_data;  
         MasterComdDataV3  A1B1_motor_send_data; 
 };
 
@@ -61,10 +62,11 @@ struct MotorData{
         float LW;                      
         int Acc;                      
 
-        float gyro[3];                  
+        float gyro[3];              
         float acc[3];
-    private:
-        MotorData_t GO_M8010_6_motor_recv_data;    
+        MotorData_t GO_M8010_6_motor_recv_data;  
+        
+    private:  
         ServoComdDataV3 A1B1_motor_recv_data;     
 };
 

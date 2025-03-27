@@ -60,13 +60,13 @@ typedef struct
 typedef struct
 {
     uint8_t head[2];    // 包头         2Byte
-    RIS_Mode_t mode;    // 电机控制模式  1Byte
-    RIS_Comd_t comd;    // 电机期望数据 12Byte
-    uint16_t   CRC16;   // CRC          2Byte
+    RIS_Mode_t mode;    // 电机控制模式  Motor control mode 1Byte
+    RIS_Comd_t comd;    // 电机期望数据 Motor desird data 12Byte
+    uint16_t   CRC32;   // CRC          4Byte
 
-} ControlData_t;    // 主机控制命令     17Byte
+} ControlData_t;    // 主机控制命令     19Byte
 
-/**
+/*
  * @brief 电机反馈数据包格式
  * 
  */

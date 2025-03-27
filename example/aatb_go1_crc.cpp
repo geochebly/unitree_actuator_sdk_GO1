@@ -1,21 +1,20 @@
+// AATB / Thibault Brevet
+// compute CRC with CRC32 for Go1 motor commands
+
 #include <unistd.h>
-#include "serialPort/SerialPort.h"
-#include "unitreeMotor/unitreeMotor.h"
 #include <stdio.h>
 #include <iostream>
 #include <cstdint>
 #include "crc/crc32.h"
-#include "crc/calculate_CRC.h"
 
 int main() {
 
-  SerialPort  serial("/dev/ttyUSB0");
-  MotorCmd    cmd;
-  MotorData   data;
+  // from Ian's capture
+  // feee001500ffff00000020421000ff7f805ce97f14000004050000000000b02833b2
+  // fe ee 00 15 00 ff ff 00 00 00 20 42 10 00 ff 7f 80 5c e9 7f 14 00 00 04 05 00 00 00 00 00 b0 28 33 b2
+  // desired CRC is b0 28 33 b2
 
-  /*while(true) 
-  {
-    uint8_t s[30];
+  uint8_t s[30];
 
     s[0] = 0xFE; // header 1
     s[1] = 0xEE; // header 2
@@ -66,25 +65,26 @@ int main() {
     SetMotor_cmd[cmdStartAddr + 0x1e] = uVar5 // computed CRC
     */
 
+    printf("Go1 payload is: ");
+    for (int i=0; i<30; i++){
+      printf("%02x", s[i]);
+    }
+    std::cout << std::endl;
 
-    cmd.motorType = MotorType::GO_M8010_6;
-    data.motorType = MotorType::GO_M8010_6;
-    cmd.mode = queryMotorMode(MotorType::GO_M8010_6,MotorMode::FOC);
-    cmd.id   = 0;
-    cmd.kp   = 0.0;
-    cmd.kd   = 0.01;
-    cmd.q    = 0.0;
-    cmd.dq   = -6.28*queryGearRatio(MotorType::GO_M8010_6);
-    cmd.tau  = 0.0;
-    cmd.GO_M8010_6_motor_send_data.CRC32 = calc_CRC32(cmd);
-    serial.sendRecv(&cmd,&data);
+    // cast uint8 to uint32 pointer
+    uint32_t* ptr_s;
+    ptr_s = (uint32_t *) &s;
 
-    std::cout <<  std::endl;
-    std::cout <<  "motor.q: "    << data.q    <<  std::endl;
-    std::cout <<  "motor.temp: "   << data.temp   <<  std::endl;
-    std::cout <<  "motor.W: "      << data.dq      <<  std::endl;
-    std::cout <<  "motor.merror: " << data.merror <<  std::endl;
-    std::cout <<  std::endl;
+    // get the CRC, somehow it only uses 28 bytes (7x4)
+    // this was also found in the decompiled binary of go2 basic_service
+    uint32_t crc = crc32_core(ptr_s, 7);
 
-    usleep(200);
-  }
+    printf("computed CRC is: %02x ", (crc >> (8*0)) & 0xff);
+    printf("%02x ", (crc >> (8*1)) & 0xff);
+    printf("%02x ", (crc >> (8*2)) & 0xff);
+    printf("%02x", (crc >> (8*3)) & 0xff);
+      std::cout << std::endl;
+
+    printf("captured CRC is: b0 28 33 b2");
+    std::cout << std::endl;
+}
